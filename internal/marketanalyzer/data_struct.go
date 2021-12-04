@@ -8,8 +8,8 @@ type RawMarketData struct {
 }
 
 type CalculatedMarketData struct {
-	SalesPercentage    float64
-	EarningsPercentage float64
+	Quarters []Quarter
+	Data     map[RowName][]*big.Float
 }
 
 type Quarter struct {

@@ -9,14 +9,14 @@ import (
 )
 
 type Printer struct {
-	marketData *marketanalyzer.RawMarketData
+	marketData *marketanalyzer.CalculatedMarketData
 }
 
 func Init() *Printer {
 	return &Printer{}
 }
 
-func (printer *Printer) SetMarketData(data *marketanalyzer.RawMarketData) {
+func (printer *Printer) SetMarketData(data *marketanalyzer.CalculatedMarketData) {
 	printer.marketData = data
 }
 

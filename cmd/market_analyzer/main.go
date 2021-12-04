@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 	"github.com/VxVxN/market_analyzer/internal/parser/myfileparser"
 	p "github.com/VxVxN/market_analyzer/internal/printer"
 )
@@ -14,7 +15,10 @@ func main() {
 	if err = parser.Parse(); err != nil {
 		log.Fatalln(err)
 	}
-	marketData := parser.GetData()
+	rawMarketData := parser.GetData()
+
+	analyzer := marketanalyzer.Init(rawMarketData)
+	marketData := analyzer.Calculate()
 
 	printer := p.Init()
 	printer.SetMarketData(marketData)
