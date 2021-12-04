@@ -1,6 +1,6 @@
 package parser
 
-import "market_analyzer/internal/marketanalyzer"
+import "github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 
 type Parser interface {
 	Parse() error

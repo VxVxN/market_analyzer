@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"market_analyzer/internal/marketanalyzer"
+	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 )
 
 type Parser struct {
