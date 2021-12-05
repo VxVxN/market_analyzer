@@ -7,6 +7,7 @@ import (
 	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 	"github.com/VxVxN/market_analyzer/internal/parser/myfileparser"
 	p "github.com/VxVxN/market_analyzer/internal/printer"
+	"github.com/VxVxN/market_analyzer/internal/saver/csvsaver"
 )
 
 func main() {
@@ -23,6 +24,11 @@ func main() {
 	humanizer := hum.Init(marketData, rawMarketData)
 	humanizer.SetPrecision(2)
 	data := humanizer.Humanize()
+
+	saver := csvsaver.Init(data)
+	if err = saver.Save("data/save/humanize_data.csv"); err != nil {
+		log.Fatalln(err)
+	}
 
 	printer := p.Init()
 	printer.Print(data)
