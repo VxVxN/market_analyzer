@@ -26,10 +26,10 @@ func Init(filePath string) *Parser {
 	}
 }
 
-func (parser *Parser) Parse() error {
+func (parser *Parser) Parse() (*marketanalyzer.RawMarketData, error) {
 	file, err := os.Open(parser.filePath)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer file.Close()
 
@@ -37,10 +37,10 @@ func (parser *Parser) Parse() error {
 
 	headers, err := reader.Read() // quarters
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = parser.parseQuarters(headers); err != nil {
-		return err
+		return nil, err
 	}
 
 	for {
@@ -49,17 +49,13 @@ func (parser *Parser) Parse() error {
 			break
 		}
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if err = parser.parseRow(record); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
-}
-
-func (parser *Parser) GetData() *marketanalyzer.RawMarketData {
-	return parser.marketData
+	return parser.marketData, nil
 }
 
 func (parser *Parser) parseQuarters(headers []string) error {

@@ -5,49 +5,37 @@ import (
 
 	"github.com/alexeyco/simpletable"
 
-	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
+	"github.com/VxVxN/market_analyzer/internal/humanizer"
 )
 
 type Printer struct {
-	marketData *marketanalyzer.CalculatedMarketData
 }
 
 func Init() *Printer {
 	return &Printer{}
 }
 
-func (printer *Printer) SetMarketData(data *marketanalyzer.CalculatedMarketData) {
-	printer.marketData = data
-}
-
-func (printer *Printer) Print() {
+func (printer *Printer) Print(data *humanizer.ReadyData) {
 	table := simpletable.New()
 
-	headers := []*simpletable.Cell{
-		{Align: simpletable.AlignCenter, Text: "#"},
-	}
+	headers := make([]*simpletable.Cell, 0, len(data.Headers))
 
-	for _, quarter := range printer.marketData.Quarters {
+	for _, header := range data.Headers {
 		headers = append(headers, &simpletable.Cell{
 			Align: simpletable.AlignCenter,
-			Text:  fmt.Sprint(quarter.Year, "/", quarter.Quarter),
+			Text:  header,
 		})
 	}
 	table.Header = &simpletable.Header{
 		Cells: headers,
 	}
 
-	for rowName, row := range printer.marketData.Data {
-		records := []*simpletable.Cell{
-			{
-				Align: simpletable.AlignRight,
-				Text:  string(rowName),
-			},
-		}
+	for _, row := range data.Rows {
+		records := make([]*simpletable.Cell, 0, len(row))
 		for _, record := range row {
 			records = append(records, &simpletable.Cell{
 				Align: simpletable.AlignRight,
-				Text:  record.String(),
+				Text:  record,
 			})
 		}
 		table.Body.Cells = append(table.Body.Cells, records)

@@ -3,24 +3,27 @@ package main
 import (
 	"log"
 
+	hum "github.com/VxVxN/market_analyzer/internal/humanizer"
 	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 	"github.com/VxVxN/market_analyzer/internal/parser/myfileparser"
 	p "github.com/VxVxN/market_analyzer/internal/printer"
 )
 
 func main() {
-	var err error
 	parser := myfileparser.Init("data/fixp.csv")
 
-	if err = parser.Parse(); err != nil {
+	rawMarketData, err := parser.Parse()
+	if err != nil {
 		log.Fatalln(err)
 	}
-	rawMarketData := parser.GetData()
 
 	analyzer := marketanalyzer.Init(rawMarketData)
 	marketData := analyzer.Calculate()
 
+	humanizer := hum.Init(marketData, rawMarketData)
+	humanizer.SetPrecision(2)
+	data := humanizer.Humanize()
+
 	printer := p.Init()
-	printer.SetMarketData(marketData)
-	printer.Print()
+	printer.Print(data)
 }
