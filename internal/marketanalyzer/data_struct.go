@@ -3,16 +3,17 @@ package marketanalyzer
 import "math/big"
 
 type RawMarketData struct {
-	Quarters []Quarter
+	Quarters []YearQuarter
 	Data     map[RowName][]*big.Int
 }
 
-type CalculatedMarketData struct {
-	Quarters []Quarter
-	Data     map[RowName][]*big.Float
+type MarketData struct {
+	Quarters          []YearQuarter
+	PercentageChanges map[RowName][]*big.Float
+	RawData           map[RowName][]*big.Int
 }
 
-type Quarter struct {
+type YearQuarter struct {
 	Year    int
 	Quarter int
 }
@@ -22,4 +23,5 @@ type RowName string
 const (
 	Sales    RowName = "sales"
 	Earnings         = "earnings"
+	Debts            = "debts"
 )

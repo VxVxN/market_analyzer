@@ -59,7 +59,7 @@ func (parser *Parser) Parse() (*marketanalyzer.RawMarketData, error) {
 }
 
 func (parser *Parser) parseQuarters(headers []string) error {
-	var quarters []marketanalyzer.Quarter
+	var quarters []marketanalyzer.YearQuarter
 	for i, header := range headers {
 		if i == 0 {
 			continue // skip empty string
@@ -76,7 +76,7 @@ func (parser *Parser) parseQuarters(headers []string) error {
 		if err != nil {
 			return fmt.Errorf("invalid quarter, expected integer, record: %s", splitHeader[1])
 		}
-		quarters = append(quarters, marketanalyzer.Quarter{
+		quarters = append(quarters, marketanalyzer.YearQuarter{
 			Year:    year,
 			Quarter: quarter,
 		})

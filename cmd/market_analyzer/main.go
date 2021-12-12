@@ -17,12 +17,17 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	analyzer := marketanalyzer.Init(rawMarketData)
+	analyzer.SetQuarter(marketanalyzer.ThirdQuarter)
 	marketData := analyzer.Calculate()
 
-	humanizer := hum.Init(marketData, rawMarketData)
+	humanizer := hum.Init(marketData)
 	humanizer.SetPrecision(2)
+	humanizer.SetNumbersMode(hum.NumbersWithPercentages)
+	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{
+		// marketanalyzer.Sales,
+		// marketanalyzer.Earnings,
+	})
 	data := humanizer.Humanize()
 
 	saver := csvsaver.Init(data)
