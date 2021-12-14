@@ -18,7 +18,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	analyzer := marketanalyzer.Init(rawMarketData)
-	analyzer.SetQuarter(marketanalyzer.ThirdQuarter)
+	analyzer.SetPeriodMode(marketanalyzer.YearMode)
 	marketData := analyzer.Calculate()
 
 	humanizer := hum.Init(marketData)
@@ -26,7 +26,8 @@ func main() {
 	humanizer.SetNumbersMode(hum.NumbersWithPercentages)
 	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{
 		// marketanalyzer.Sales,
-		// marketanalyzer.Earnings,
+		// marketanalyz
+		// er.Earnings,
 	})
 	data := humanizer.Humanize()
 

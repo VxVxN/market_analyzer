@@ -3,8 +3,8 @@ package marketanalyzer
 import "math/big"
 
 type RawMarketData struct {
-	Quarters []YearQuarter
-	Data     map[RowName][]*big.Int
+	YearQuarters []YearQuarter
+	Data         map[RowName][]*big.Int
 }
 
 type MarketData struct {

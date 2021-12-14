@@ -81,7 +81,7 @@ func (parser *Parser) parseQuarters(headers []string) error {
 			Quarter: quarter,
 		})
 	}
-	parser.marketData.Quarters = quarters
+	parser.marketData.YearQuarters = quarters
 	return nil
 }
 

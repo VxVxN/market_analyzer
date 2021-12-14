@@ -9,34 +9,34 @@ import (
 type MarketAnalyzer struct {
 	data *RawMarketData
 
-	// quarter analyze by quarter
-	quarter Quarter
+	periodMode PeriodMode
 }
 
-type Quarter int
+type PeriodMode int
 
 const (
-	FirstQuarter Quarter = iota
-	SecondQuarter
-	ThirdQuarter
-	FourthQuarter
-	AllQuarters
+	FirstQuarterMode PeriodMode = iota
+	SecondQuarterMode
+	ThirdQuarterMode
+	FourthQuarterMode
+	YearMode
+	NormalMode
 )
 
 func Init(data *RawMarketData) *MarketAnalyzer {
 	return &MarketAnalyzer{
-		data:    data,
-		quarter: AllQuarters,
+		data:       data,
+		periodMode: NormalMode,
 	}
 }
 
 func (analyzer *MarketAnalyzer) Calculate() *MarketData {
 	calculatedData := &MarketData{
-		Quarters: analyzer.data.Quarters,
+		Quarters: analyzer.data.YearQuarters,
 	}
 
-	changedData := analyzer.changeDataByQuarter()
-	calculatedData.Quarters = changedData.Quarters
+	changedData := analyzer.changeDataByPeriodMode()
+	calculatedData.Quarters = changedData.YearQuarters
 	calculatedData.RawData = changedData.Data
 
 	data := make(map[RowName][]*big.Float)
@@ -59,48 +59,74 @@ func (analyzer *MarketAnalyzer) Calculate() *MarketData {
 	return calculatedData
 }
 
-func (analyzer *MarketAnalyzer) SetQuarter(quarter Quarter) {
-	analyzer.quarter = quarter
+func (analyzer *MarketAnalyzer) SetPeriodMode(quarter PeriodMode) {
+	analyzer.periodMode = quarter
 }
 
-func (analyzer *MarketAnalyzer) changeDataByQuarter() *RawMarketData {
-	if analyzer.quarter == AllQuarters {
+func (analyzer *MarketAnalyzer) changeDataByPeriodMode() *RawMarketData {
+	if analyzer.periodMode == NormalMode {
 		return analyzer.data
 	}
 	changedData := new(RawMarketData)
 	var resultQuarters []YearQuarter
 	var skipIndex []int
+	var yearsWithQuarters []struct {
+		year     int
+		quarters []int
+	}
 
-	for i, quarter := range analyzer.data.Quarters {
-		switch analyzer.quarter {
-		case FirstQuarter:
-			if quarter.Quarter == 1 {
-				resultQuarters = append(resultQuarters, quarter)
+	for i, yearQuarter := range analyzer.data.YearQuarters {
+		switch analyzer.periodMode {
+		case FirstQuarterMode:
+			if yearQuarter.Quarter == 1 {
+				resultQuarters = append(resultQuarters, yearQuarter)
 			} else {
 				skipIndex = append(skipIndex, i)
 			}
-		case SecondQuarter:
-			if quarter.Quarter == 2 {
-				resultQuarters = append(resultQuarters, quarter)
+		case SecondQuarterMode:
+			if yearQuarter.Quarter == 2 {
+				resultQuarters = append(resultQuarters, yearQuarter)
 			} else {
 				skipIndex = append(skipIndex, i)
 			}
-		case ThirdQuarter:
-			if quarter.Quarter == 3 {
-				resultQuarters = append(resultQuarters, quarter)
+		case ThirdQuarterMode:
+			if yearQuarter.Quarter == 3 {
+				resultQuarters = append(resultQuarters, yearQuarter)
 			} else {
 				skipIndex = append(skipIndex, i)
 			}
-		case FourthQuarter:
-			if quarter.Quarter == 4 {
-				resultQuarters = append(resultQuarters, quarter)
+		case FourthQuarterMode:
+			if yearQuarter.Quarter == 4 {
+				resultQuarters = append(resultQuarters, yearQuarter)
 			} else {
 				skipIndex = append(skipIndex, i)
+			}
+		case YearMode:
+			var index int
+			for i, yq := range yearsWithQuarters {
+				if yq.year == yearQuarter.Year {
+					index = i
+					break
+				}
+			}
+			if index != 0 {
+				yearsWithQuarters[index].quarters = append(yearsWithQuarters[index].quarters, yearQuarter.Quarter)
+			} else {
+				yearsWithQuarters = append(
+					yearsWithQuarters, struct {
+						year     int
+						quarters []int
+					}{year: yearQuarter.Year, quarters: []int{yearQuarter.Quarter}})
 			}
 		}
 	}
 
-	changedData.Quarters = resultQuarters
+	if analyzer.periodMode == YearMode {
+		analyzer.groupByYears(changedData, yearsWithQuarters)
+		return changedData
+	}
+
+	changedData.YearQuarters = resultQuarters
 	data := make(map[RowName][]*big.Int)
 	for name, records := range analyzer.data.Data {
 		var recordsCurrentRow []*big.Int
@@ -113,4 +139,47 @@ func (analyzer *MarketAnalyzer) changeDataByQuarter() *RawMarketData {
 	}
 	changedData.Data = data
 	return changedData
+}
+
+func (analyzer *MarketAnalyzer) groupByYears(
+	changedData *RawMarketData, yearsWithQuarters []struct {
+		year     int
+		quarters []int
+	},
+) {
+	changedData.YearQuarters = []YearQuarter{}
+	for _, yearQuarter := range yearsWithQuarters {
+		changedData.YearQuarters = append(
+			changedData.YearQuarters, YearQuarter{
+				Year: yearQuarter.year,
+			},
+		)
+	}
+	data := make(map[RowName][]*big.Int)
+	var startSegment, endSegment int
+	for _, quarters := range yearsWithQuarters {
+		endSegment = startSegment + len(quarters.quarters)
+		for name, records := range analyzer.data.Data {
+			values := records[startSegment:endSegment]
+			sumQuartersValue := new(big.Int)
+
+			var numberNoneEmptyVaoue int
+			for _, value := range values {
+				if value.Sign() != 0 {
+					numberNoneEmptyVaoue++
+				}
+				sumQuartersValue.Add(sumQuartersValue, value)
+			}
+			numberValues := int64(numberNoneEmptyVaoue)
+			if numberValues < 1 {
+				numberValues = 1
+			}
+
+			sumQuartersValue.Div(sumQuartersValue, big.NewInt(numberValues))
+			data[name] = append(data[name], sumQuartersValue)
+		}
+		startSegment = endSegment
+
+	}
+	changedData.Data = data
 }

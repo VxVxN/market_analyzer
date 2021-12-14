@@ -49,7 +49,11 @@ func (humanizer *Humanizer) Humanize() *ReadyData {
 		Headers: []string{"#"},
 	}
 	for _, quarter := range humanizer.marketData.Quarters {
-		data.Headers = append(data.Headers, fmt.Sprint(quarter.Year, "/", quarter.Quarter))
+		if quarter.Quarter == 0 {
+			data.Headers = append(data.Headers, fmt.Sprint(quarter.Year))
+		} else {
+			data.Headers = append(data.Headers, fmt.Sprint(quarter.Year, "/", quarter.Quarter))
+		}
 	}
 
 	for _, name := range order {
