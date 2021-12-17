@@ -71,12 +71,14 @@ func (humanizer *Humanizer) Humanize() *ReadyData {
 			// TODO add warning
 			continue
 		}
+		var isFindNumber bool
 		row := []string{string(name)}
 		for i, record := range records {
 			switch {
 			case record.Sign() == 0:
 				row = append(row, "-")
-			case record.IsInt():
+			case record.IsInt() && !isFindNumber:
+				isFindNumber = true
 				str := record.Text('g', 100)
 				str = tools.HumanizeNumber(str)
 				row = append(row, str)

@@ -39,6 +39,11 @@ func (analyzer *MarketAnalyzer) Calculate() *MarketData {
 	calculatedData.Quarters = changedData.YearQuarters
 	calculatedData.RawData = changedData.Data
 
+	analyzer.calculatePercentageChanges(changedData, calculatedData)
+	return calculatedData
+}
+
+func (analyzer *MarketAnalyzer) calculatePercentageChanges(changedData *RawMarketData, calculatedData *MarketData) {
 	data := make(map[RowName][]*big.Float)
 	for name, records := range changedData.Data {
 		var calculatedData []*big.Float
@@ -56,7 +61,6 @@ func (analyzer *MarketAnalyzer) Calculate() *MarketData {
 		data[name] = calculatedData
 	}
 	calculatedData.PercentageChanges = data
-	return calculatedData
 }
 
 func (analyzer *MarketAnalyzer) SetPeriodMode(quarter PeriodMode) {
