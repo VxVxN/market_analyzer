@@ -1,4 +1,5 @@
-package myfileparser
+// Package smartlabparser parse report from https://smart-lab.ru/
+package smartlabparser
 
 import (
 	"encoding/csv"
@@ -26,6 +27,12 @@ func Init(filePath string) *Parser {
 	}
 }
 
+var parsedRows = map[string]marketanalyzer.RowName{
+	"Выручка, млрд руб":        marketanalyzer.Sales,
+	"Чистая прибыль, млрд руб": marketanalyzer.Earnings,
+	"Долг, млрд руб":           marketanalyzer.Debts,
+}
+
 func (parser *Parser) Parse() (*marketanalyzer.RawMarketData, error) {
 	file, err := os.Open(parser.filePath)
 	if err != nil {
@@ -34,11 +41,13 @@ func (parser *Parser) Parse() (*marketanalyzer.RawMarketData, error) {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
+	reader.Comma = ';'
 
 	headers, err := reader.Read()
 	if err != nil {
 		return nil, err
 	}
+
 	if err = parser.parseQuarters(headers); err != nil {
 		return nil, err
 	}
@@ -64,7 +73,7 @@ func (parser *Parser) parseQuarters(headers []string) error {
 		if i == 0 {
 			continue // skip empty string
 		}
-		splitHeader := strings.Split(header, "/")
+		splitHeader := strings.Split(header, "Q")
 		if len(splitHeader) != 2 {
 			return fmt.Errorf("invalid header, expected format: [year/quater], actual: %s", header)
 		}
@@ -86,7 +95,10 @@ func (parser *Parser) parseQuarters(headers []string) error {
 }
 
 func (parser *Parser) parseRow(records []string) error {
-	rowName := marketanalyzer.RowName(records[0])
+	rowName, ok := parsedRows[records[0]]
+	if !ok {
+		return nil // skip excess row
+	}
 	var data []*big.Int
 	for i, record := range records {
 		if i == 0 {
@@ -96,12 +108,21 @@ func (parser *Parser) parseRow(records []string) error {
 			data = append(data, new(big.Int))
 			continue
 		}
-		recNumber, err := strconv.Atoi(record)
+		recordFloat, err := strconv.ParseFloat(record, 64)
 		if err != nil {
 			return fmt.Errorf("invalid record %s, expected integer, record: %s", rowName, record)
 		}
 
-		data = append(data, big.NewInt(int64(recNumber)))
+		recordBigFloat := big.NewFloat(recordFloat)
+		recordBigFloat.Mul(recordBigFloat, big.NewFloat(1000000000))
+		text := recordBigFloat.Text('g', 100)
+
+		numberRecord, ok := new(big.Int).SetString(text, 0)
+		if !ok {
+			return fmt.Errorf("invalid record, expected integer, record: %s", record)
+		}
+
+		data = append(data, numberRecord)
 	}
 	parser.marketData.Data[rowName] = data
 
