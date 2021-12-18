@@ -21,7 +21,8 @@ type YearQuarter struct {
 type RowName string
 
 const (
-	Sales    RowName = "sales"
-	Earnings         = "earnings"
-	Debts            = "debts"
+	Sales     RowName = "sales"
+	Earnings          = "earnings"
+	Debts             = "debts"
+	MarketCap         = "market_cap"
 )

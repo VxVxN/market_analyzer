@@ -40,6 +40,7 @@ func Init(marketData *marketanalyzer.MarketData) *Humanizer {
 
 func (humanizer *Humanizer) Humanize() *ReadyData {
 	order := []marketanalyzer.RowName{
+		marketanalyzer.MarketCap,
 		marketanalyzer.Sales,
 		marketanalyzer.Earnings,
 		marketanalyzer.Debts,

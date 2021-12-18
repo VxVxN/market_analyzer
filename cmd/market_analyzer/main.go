@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	parser := myfileparser.Init("data/fixp.csv")
+	parser := myfileparser.Init("data/emitters/fixp.csv")
 
 	rawData, err := parser.Parse()
 	if err != nil {
@@ -39,7 +39,7 @@ func main() {
 	})
 	data := humanizer.Humanize()
 
-	saver := csvsaver.Init("data/save/humanize_data.csv", data.Headers, data.Rows)
+	saver := csvsaver.Init("data/saved_reports/humanize_data.csv", data.Headers, data.Rows)
 	if err = saver.Save(); err != nil {
 		log.Fatalf("Failed to save file: %v", err)
 	}

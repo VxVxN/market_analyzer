@@ -15,8 +15,9 @@ import (
 )
 
 type Parser struct {
-	filePath  string
-	readyData *humanizer.ReadyData
+	filePath    string
+	isLTMHeader bool
+	readyData   *humanizer.ReadyData
 }
 
 func Init(filePath string) *Parser {
@@ -30,6 +31,7 @@ var parsedRows = map[string]marketanalyzer.RowName{
 	"Выручка, млрд руб":        marketanalyzer.Sales,
 	"Чистая прибыль, млрд руб": marketanalyzer.Earnings,
 	"Долг, млрд руб":           marketanalyzer.Debts,
+	"Капитализация, млрд руб":  marketanalyzer.MarketCap,
 }
 
 func (parser *Parser) Parse() (*humanizer.ReadyData, error) {
@@ -74,7 +76,11 @@ func (parser *Parser) parseHeaders(headers []string) error {
 		}
 		splitHeader := strings.Split(header, "Q")
 		if len(splitHeader) != 2 {
-			return fmt.Errorf("invalid header, expected format: [year/quater], actual: %s", header)
+			if header == "LTM" {
+				parser.isLTMHeader = true
+				continue // TODO LTM
+			}
+			return fmt.Errorf("invalid header, expected format: [yearQquater], actual: %s", header)
 		}
 		year, err := strconv.Atoi(splitHeader[0])
 		if err != nil {
@@ -101,6 +107,10 @@ func (parser *Parser) parseRow(records []string) error {
 	for i, record := range records {
 		if i == 0 {
 			continue // skip rowName
+		}
+
+		if parser.isLTMHeader && i == len(records)-1 {
+			continue // skip LTM column
 		}
 
 		if record == "" {
