@@ -12,7 +12,7 @@ type Humanizer struct {
 	marketData *marketanalyzer.MarketData
 
 	precision        int
-	mode             NumbersMode
+	mode             NumberMode
 	fieldsForDisplay []marketanalyzer.RowName
 	// fromYear, toYear int // for range
 }
@@ -22,17 +22,17 @@ type ReadyData struct {
 	Rows    [][]string
 }
 
-type NumbersMode int
+type NumberMode int
 
 const (
-	NumbersWithPercentages NumbersMode = iota
-	Numbers
-	Percentages
+	NumbersWithPercentagesMode NumberMode = iota
+	NumbersMode
+	PercentagesMode
 )
 
 func Init(marketData *marketanalyzer.MarketData) *Humanizer {
 	return &Humanizer{
-		mode:       NumbersWithPercentages,
+		mode:       NumbersWithPercentagesMode,
 		marketData: marketData,
 		precision:  0,
 	}
@@ -98,11 +98,11 @@ func (humanizer *Humanizer) Humanize() *ReadyData {
 
 				var str string
 				switch humanizer.mode {
-				case NumbersWithPercentages:
+				case NumbersWithPercentagesMode:
 					str = fmt.Sprintf("%s(%s%s%s)", rawDataStr, sign, result.Text('f', humanizer.precision), "%")
-				case Numbers:
+				case NumbersMode:
 					str = fmt.Sprintf("%s", rawDataStr)
-				case Percentages:
+				case PercentagesMode:
 					str = fmt.Sprintf("%s%s%s", sign, result.Text('f', humanizer.precision), "%")
 				}
 
@@ -119,7 +119,7 @@ func (humanizer *Humanizer) SetPrecision(precision int) {
 	humanizer.precision = precision
 }
 
-func (humanizer *Humanizer) SetNumbersMode(mode NumbersMode) {
+func (humanizer *Humanizer) SetNumbersMode(mode NumberMode) {
 	humanizer.mode = mode
 }
 

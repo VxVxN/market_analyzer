@@ -3,22 +3,24 @@ package csvsaver
 import (
 	"encoding/csv"
 	"os"
-
-	"github.com/VxVxN/market_analyzer/internal/humanizer"
 )
 
 type Saver struct {
-	data *humanizer.ReadyData
+	fileName string
+	headers  []string
+	data     [][]string
 }
 
-func Init(data *humanizer.ReadyData) *Saver {
+func Init(fileName string, headers []string, data [][]string) *Saver {
 	return &Saver{
-		data: data,
+		fileName: fileName,
+		headers:  headers,
+		data:     data,
 	}
 }
 
-func (saver *Saver) Save(fileName string) error {
-	csvFile, err := os.Create(fileName)
+func (saver *Saver) Save() error {
+	csvFile, err := os.Create(saver.fileName)
 	if err != nil {
 		return err
 	}
@@ -26,10 +28,10 @@ func (saver *Saver) Save(fileName string) error {
 
 	csvWriter := csv.NewWriter(csvFile)
 
-	if err = csvWriter.Write(saver.data.Headers); err != nil {
+	if err = csvWriter.Write(saver.headers); err != nil {
 		return err
 	}
-	for _, row := range saver.data.Rows {
+	for _, row := range saver.data {
 		if err = csvWriter.Write(row); err != nil {
 			return err
 		}

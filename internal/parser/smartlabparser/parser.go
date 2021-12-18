@@ -10,20 +10,19 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/VxVxN/market_analyzer/internal/humanizer"
 	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 )
 
 type Parser struct {
-	filePath   string
-	marketData *marketanalyzer.RawMarketData
+	filePath  string
+	readyData *humanizer.ReadyData
 }
 
 func Init(filePath string) *Parser {
-	marketData := new(marketanalyzer.RawMarketData)
-	marketData.Data = make(map[marketanalyzer.RowName][]*big.Int)
 	return &Parser{
-		marketData: marketData,
-		filePath:   filePath,
+		readyData: new(humanizer.ReadyData),
+		filePath:  filePath,
 	}
 }
 
@@ -33,7 +32,7 @@ var parsedRows = map[string]marketanalyzer.RowName{
 	"Долг, млрд руб":           marketanalyzer.Debts,
 }
 
-func (parser *Parser) Parse() (*marketanalyzer.RawMarketData, error) {
+func (parser *Parser) Parse() (*humanizer.ReadyData, error) {
 	file, err := os.Open(parser.filePath)
 	if err != nil {
 		return nil, err
@@ -48,7 +47,7 @@ func (parser *Parser) Parse() (*marketanalyzer.RawMarketData, error) {
 		return nil, err
 	}
 
-	if err = parser.parseQuarters(headers); err != nil {
+	if err = parser.parseHeaders(headers); err != nil {
 		return nil, err
 	}
 
@@ -64,11 +63,11 @@ func (parser *Parser) Parse() (*marketanalyzer.RawMarketData, error) {
 			return nil, err
 		}
 	}
-	return parser.marketData, nil
+	return parser.readyData, nil
 }
 
-func (parser *Parser) parseQuarters(headers []string) error {
-	var quarters []marketanalyzer.YearQuarter
+func (parser *Parser) parseHeaders(headers []string) error {
+	readyHeaders := []string{""}
 	for i, header := range headers {
 		if i == 0 {
 			continue // skip empty string
@@ -85,12 +84,9 @@ func (parser *Parser) parseQuarters(headers []string) error {
 		if err != nil {
 			return fmt.Errorf("invalid quarter, expected integer, record: %s", splitHeader[1])
 		}
-		quarters = append(quarters, marketanalyzer.YearQuarter{
-			Year:    year,
-			Quarter: quarter,
-		})
+		readyHeaders = append(readyHeaders, fmt.Sprintf("%d/%d", year, quarter))
 	}
-	parser.marketData.YearQuarters = quarters
+	parser.readyData.Headers = readyHeaders
 	return nil
 }
 
@@ -99,13 +95,16 @@ func (parser *Parser) parseRow(records []string) error {
 	if !ok {
 		return nil // skip excess row
 	}
-	var data []*big.Int
+
+	readyRecords := []string{string(rowName)}
+
 	for i, record := range records {
 		if i == 0 {
 			continue // skip rowName
 		}
+
 		if record == "" {
-			data = append(data, new(big.Int))
+			readyRecords = append(readyRecords, "")
 			continue
 		}
 		recordFloat, err := strconv.ParseFloat(record, 64)
@@ -117,14 +116,9 @@ func (parser *Parser) parseRow(records []string) error {
 		recordBigFloat.Mul(recordBigFloat, big.NewFloat(1000000000))
 		text := recordBigFloat.Text('g', 100)
 
-		numberRecord, ok := new(big.Int).SetString(text, 0)
-		if !ok {
-			return fmt.Errorf("invalid record, expected integer, record: %s", record)
-		}
-
-		data = append(data, numberRecord)
+		readyRecords = append(readyRecords, text)
 	}
-	parser.marketData.Data[rowName] = data
+	parser.readyData.Rows = append(parser.readyData.Rows, readyRecords)
 
 	return nil
 }

@@ -84,7 +84,7 @@ func TestHumanizer_Humanize(t *testing.T) {
 	})
 	humanizer.SetPrecision(1)
 	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{marketanalyzer.Sales})
-	humanizer.SetNumbersMode(NumbersWithPercentages)
+	humanizer.SetNumbersMode(NumbersWithPercentagesMode)
 	data := humanizer.Humanize()
 
 	expectedHeaders := []string{

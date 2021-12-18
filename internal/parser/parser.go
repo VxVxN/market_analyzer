@@ -1,8 +1,10 @@
 package parser
 
-import "github.com/VxVxN/market_analyzer/internal/marketanalyzer"
+import (
+	"github.com/VxVxN/market_analyzer/internal/humanizer"
+)
 
 type Parser interface {
 	Parse() error
-	GetData() *marketanalyzer.RawMarketData
+	GetData() *humanizer.ReadyData
 }
