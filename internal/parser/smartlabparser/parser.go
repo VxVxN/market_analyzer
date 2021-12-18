@@ -124,9 +124,9 @@ func (parser *Parser) parseRow(records []string) error {
 
 		recordBigFloat := big.NewFloat(recordFloat)
 		recordBigFloat.Mul(recordBigFloat, big.NewFloat(1000000000))
-		text := recordBigFloat.Text('g', 100)
+		recordBigInt, _ := recordBigFloat.Int(nil)
 
-		readyRecords = append(readyRecords, text)
+		readyRecords = append(readyRecords, recordBigInt.String())
 	}
 	parser.readyData.Rows = append(parser.readyData.Rows, readyRecords)
 

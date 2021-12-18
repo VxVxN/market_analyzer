@@ -2,6 +2,7 @@ package myfileparser
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"os"
 
@@ -45,6 +46,8 @@ func (parser *Parser) Parse() (*humanizer.ReadyData, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Println(record)
 		parser.readyData.Rows = append(parser.readyData.Rows, record)
 	}
 	return parser.readyData, nil

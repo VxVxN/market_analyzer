@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	parser := myfileparser.Init("data/emitters/fixp.csv")
+	parser := myfileparser.Init("data/emitters/ozon.csv")
 
 	rawData, err := parser.Parse()
 	if err != nil {
