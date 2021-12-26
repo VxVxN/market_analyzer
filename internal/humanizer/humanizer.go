@@ -87,10 +87,8 @@ func (humanizer *Humanizer) Humanize() *ReadyData {
 				rawData := humanizer.marketData.RawData[name][i]
 
 				result := new(big.Float).Mul(record, new(big.Float).SetInt64(100))
-				result.Sub(result, big.NewFloat(100))
-
 				sign := "+"
-				if result.Cmp(big.NewFloat(1)) == -1 {
+				if result.Cmp(big.NewFloat(0)) == -1 {
 					sign = ""
 				}
 

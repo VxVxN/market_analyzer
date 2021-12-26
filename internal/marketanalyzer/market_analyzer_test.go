@@ -39,6 +39,15 @@ var marketAnalyzer = Init(&RawMarketData{
 		},
 	},
 	Data: map[RowName][]*big.Int{
+		Earnings: {
+			big.NewInt(-1000000000),
+			big.NewInt(-2000000000),
+			big.NewInt(-1000000000),
+			big.NewInt(1000000000),
+			big.NewInt(2000000000),
+			big.NewInt(1000000000),
+			big.NewInt(-1000000000),
+		},
 		Sales: {
 			big.NewInt(1000000000),
 			big.NewInt(2000000000),
@@ -136,13 +145,15 @@ func TestMarketAnalyzerCalculatePercentageChanges(t *testing.T) {
 	testCases := []struct {
 		name                   string
 		mode                   PeriodMode
+		rowName                RowName
 		expectedQuarters       []YearQuarter
 		expectedPercentageData []*big.Float
 	}{
 		// case 1
 		{
-			name: "check percentage changes in NormalMode",
-			mode: NormalMode,
+			name:    "check percentage changes in NormalMode",
+			mode:    NormalMode,
+			rowName: Sales,
 			expectedQuarters: []YearQuarter{
 				{
 					Year:    2016,
@@ -175,18 +186,19 @@ func TestMarketAnalyzerCalculatePercentageChanges(t *testing.T) {
 			},
 			expectedPercentageData: []*big.Float{
 				big.NewFloat(1000000000),
-				big.NewFloat(2),
-				big.NewFloat(1.5),
-				big.NewFloat(1.333333333),
-				big.NewFloat(1.25),
-				big.NewFloat(1.2),
-				big.NewFloat(1.166666667),
+				big.NewFloat(1),
+				big.NewFloat(0.5),
+				big.NewFloat(0.3333333333),
+				big.NewFloat(0.25),
+				big.NewFloat(0.2),
+				big.NewFloat(0.1666666667),
 			},
 		},
 		// case 2
 		{
-			name: "check percentage changes in FirstQuarterMode",
-			mode: FirstQuarterMode,
+			name:    "check percentage changes in FirstQuarterMode",
+			mode:    FirstQuarterMode,
+			rowName: Sales,
 			expectedQuarters: []YearQuarter{
 				{
 					Year:    2017,
@@ -203,14 +215,15 @@ func TestMarketAnalyzerCalculatePercentageChanges(t *testing.T) {
 			},
 			expectedPercentageData: []*big.Float{
 				big.NewFloat(2000000000),
-				big.NewFloat(1.5),
-				big.NewFloat(1.666666667),
+				big.NewFloat(0.5),
+				big.NewFloat(0.6666666667),
 			},
 		},
 		// case 3
 		{
-			name: "check percentage changes in YearMode",
-			mode: YearMode,
+			name:    "check percentage changes in YearMode",
+			mode:    YearMode,
+			rowName: Sales,
 			expectedQuarters: []YearQuarter{
 				{
 					Year: 2016,
@@ -227,9 +240,54 @@ func TestMarketAnalyzerCalculatePercentageChanges(t *testing.T) {
 			},
 			expectedPercentageData: []*big.Float{
 				big.NewFloat(1000000000),
+				big.NewFloat(1),
+				big.NewFloat(0.75),
+				big.NewFloat(0.7142857143),
+			},
+		},
+		// case 4
+		{
+			name:    "check percentage changes with negative and positive numbers",
+			mode:    NormalMode,
+			rowName: Earnings,
+			expectedQuarters: []YearQuarter{
+				{
+					Year:    2016,
+					Quarter: 2,
+				},
+				{
+					Year:    2017,
+					Quarter: 1,
+				},
+				{
+					Year:    2018,
+					Quarter: 1,
+				},
+				{
+					Year:    2018,
+					Quarter: 2,
+				},
+				{
+					Year:    2019,
+					Quarter: 1,
+				},
+				{
+					Year:    2019,
+					Quarter: 2,
+				},
+				{
+					Year:    2019,
+					Quarter: 3,
+				},
+			},
+			expectedPercentageData: []*big.Float{
+				big.NewFloat(-1000000000),
+				big.NewFloat(-1),
+				big.NewFloat(0.5),
 				big.NewFloat(2),
-				big.NewFloat(1.75),
-				big.NewFloat(1.714285714),
+				big.NewFloat(1),
+				big.NewFloat(-0.5),
+				big.NewFloat(-2),
 			},
 		},
 	}
@@ -247,7 +305,7 @@ func TestMarketAnalyzerCalculatePercentageChanges(t *testing.T) {
 			assert.Equalf(t, true, isFind, "[%s] year with quarter not found %d %d", testCase.name, quarter.Year, quarter.Quarter)
 		}
 
-		percentageData, _ := data.PercentageChanges[Sales]
+		percentageData, _ := data.PercentageChanges[testCase.rowName]
 		assert.NotNilf(t, percentageData, "[%s] sales not found in percentage data", testCase.name)
 
 		for i, record := range percentageData {

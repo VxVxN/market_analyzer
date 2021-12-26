@@ -49,11 +49,18 @@ func (analyzer *MarketAnalyzer) calculatePercentageChanges(changedData *RawMarke
 		var calculatedData []*big.Float
 		lastRecord := new(big.Float)
 		for _, record := range records {
-			result := new(big.Float).SetInt(record)
+			currentRecord := new(big.Float).SetInt(record)
+			result := new(big.Float)
 			if lastRecord.Sign() == 0 {
 				lastRecord.SetInt(record)
+				result.Set(lastRecord)
 			} else if record.Sign() != 0 {
-				result = new(big.Float).Quo(result, lastRecord)
+				changePrice := new(big.Float).Sub(currentRecord, lastRecord)
+				result = new(big.Float).Quo(changePrice, lastRecord)
+				if (currentRecord.Sign() == -1 && lastRecord.Sign() == -1) || (currentRecord.Sign() == 1 && lastRecord.Sign() == -1) {
+					result.Mul(result, big.NewFloat(-1))
+				}
+
 				lastRecord.SetInt(record)
 			}
 			calculatedData = append(calculatedData, result)

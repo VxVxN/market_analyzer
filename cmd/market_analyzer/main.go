@@ -34,8 +34,7 @@ func main() {
 	humanizer.SetNumbersMode(hum.NumbersWithPercentagesMode)
 	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{
 		// marketanalyzer.Sales,
-		// marketanalyz
-		// er.Earnings,
+		// marketanalyzer.Earnings,
 	})
 	data := humanizer.Humanize()
 

@@ -43,7 +43,25 @@ func TestHumanizer_Humanize(t *testing.T) {
 		},
 		PercentageChanges: map[marketanalyzer.RowName][]*big.Float{
 			marketanalyzer.Earnings: {
-				big.NewFloat(2000000000),
+				big.NewFloat(0),
+				big.NewFloat(-1000000000),
+				big.NewFloat(-1),
+				big.NewFloat(-0.5),
+				big.NewFloat(-0.333333333),
+				big.NewFloat(-0.25),
+				big.NewFloat(0.2),
+			},
+			marketanalyzer.Sales: {
+				big.NewFloat(1000000000),
+				big.NewFloat(1),
+				big.NewFloat(0.5),
+				big.NewFloat(0.333333333),
+				big.NewFloat(0.25),
+				big.NewFloat(0.2),
+				big.NewFloat(0.166666667),
+			},
+			marketanalyzer.Debts: {
+				big.NewFloat(3000000000),
 				big.NewFloat(3),
 				big.NewFloat(3.5),
 				big.NewFloat(3.333333333),
@@ -51,26 +69,17 @@ func TestHumanizer_Humanize(t *testing.T) {
 				big.NewFloat(3.2),
 				big.NewFloat(3.166666667),
 			},
-			marketanalyzer.Sales: {
-				big.NewFloat(1000000000),
-				big.NewFloat(2),
-				big.NewFloat(1.5),
-				big.NewFloat(1.333333333),
-				big.NewFloat(1.25),
-				big.NewFloat(1.2),
-				big.NewFloat(1.166666667),
-			},
-			marketanalyzer.Debts: {
-				big.NewFloat(3000000000),
-				big.NewFloat(4),
-				big.NewFloat(4.5),
-				big.NewFloat(4.333333333),
-				big.NewFloat(4.25),
-				big.NewFloat(4.2),
-				big.NewFloat(4.166666667),
-			},
 		},
 		RawData: map[marketanalyzer.RowName][]*big.Int{
+			marketanalyzer.Earnings: {
+				big.NewInt(0),
+				big.NewInt(-1000000000),
+				big.NewInt(-2000000000),
+				big.NewInt(-3000000000),
+				big.NewInt(-4000000000),
+				big.NewInt(-5000000000),
+				big.NewInt(-4000000000),
+			},
 			marketanalyzer.Sales: {
 				big.NewInt(1000000000),
 				big.NewInt(2000000000),
@@ -83,42 +92,63 @@ func TestHumanizer_Humanize(t *testing.T) {
 		},
 	})
 	humanizer.SetPrecision(1)
-	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{marketanalyzer.Sales})
+	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{marketanalyzer.Earnings, marketanalyzer.Sales})
 	humanizer.SetNumbersMode(NumbersWithPercentagesMode)
 	data := humanizer.Humanize()
 
-	expectedHeaders := []string{
-		"#",
-		"2016/2",
-		"2017/1",
-		"2018/1",
-		"2018/2",
-		"2019/1",
-		"2019/2",
-		"2019/3",
-	}
-
-	for i, header := range data.Headers {
-		expectedHeader := expectedHeaders[i]
-		assert.Equal(t, expectedHeader, header, "header not equal expected")
-	}
-
-	expectedRows := [][]string{
+	testCases := []struct {
+		name            string
+		expectedHeaders []string
+		expectedRows    [][]string
+	}{
+		// case 1
 		{
-			"sales",
-			"1.000.000.000",
-			"2.000.000.000(+100.0%)",
-			"3.000.000.000(+50.0%)",
-			"4.000.000.000(+33.3%)",
-			"5.000.000.000(+25.0%)",
-			"6.000.000.000(+20.0%)",
-			"7.000.000.000(+16.7%)",
+			name: "check NumbersWithPercentagesMode",
+			expectedHeaders: []string{
+				"#",
+				"2016/2",
+				"2017/1",
+				"2018/1",
+				"2018/2",
+				"2019/1",
+				"2019/2",
+				"2019/3",
+			},
+			expectedRows: [][]string{
+				{
+					"sales",
+					"1.000.000.000",
+					"2.000.000.000(+100.0%)",
+					"3.000.000.000(+50.0%)",
+					"4.000.000.000(+33.3%)",
+					"5.000.000.000(+25.0%)",
+					"6.000.000.000(+20.0%)",
+					"7.000.000.000(+16.7%)",
+				},
+				{
+					"earnings",
+					"-",
+					"-1.000.000.000",
+					"-2.000.000.000(-100.0%)",
+					"-3.000.000.000(-50.0%)",
+					"-4.000.000.000(-33.3%)",
+					"-5.000.000.000(-25.0%)",
+					"-4.000.000.000(+20.0%)",
+				},
+			},
 		},
 	}
-	assert.Equal(t, 1, len(data.Rows), "expected one row")
+	for _, testCase := range testCases {
+		for i, header := range data.Headers {
+			expectedHeader := testCase.expectedHeaders[i]
+			assert.Equalf(t, expectedHeader, header, "[%s] header not equal expected", testCase.name)
+		}
 
-	for i, record := range data.Rows {
-		expectedRecord := expectedRows[i]
-		assert.Equal(t, expectedRecord, record, "record not equal expected")
+		assert.Equalf(t, len(testCase.expectedRows), len(data.Rows), "[%s] expected numbers of row", testCase.name)
+
+		for i, record := range data.Rows {
+			expectedRecord := testCase.expectedRows[i]
+			assert.Equalf(t, expectedRecord, record, "[%s] record not equal expected", testCase.name)
+		}
 	}
 }
