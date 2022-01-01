@@ -22,14 +22,6 @@ type ReadyData struct {
 	Rows    [][]string
 }
 
-type NumberMode int
-
-const (
-	NumbersWithPercentagesMode NumberMode = iota
-	NumbersMode
-	PercentagesMode
-)
-
 func Init(marketData *marketanalyzer.MarketData) *Humanizer {
 	return &Humanizer{
 		mode:       NumbersWithPercentagesMode,

@@ -12,17 +12,6 @@ type MarketAnalyzer struct {
 	periodMode PeriodMode
 }
 
-type PeriodMode int
-
-const (
-	FirstQuarterMode PeriodMode = iota
-	SecondQuarterMode
-	ThirdQuarterMode
-	FourthQuarterMode
-	YearMode
-	NormalMode
-)
-
 func Init(data *RawMarketData) *MarketAnalyzer {
 	return &MarketAnalyzer{
 		data:       data,

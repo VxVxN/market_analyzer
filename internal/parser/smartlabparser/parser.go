@@ -117,6 +117,7 @@ func (parser *Parser) parseRow(records []string) error {
 			readyRecords = append(readyRecords, "")
 			continue
 		}
+		record = strings.Replace(record, " ", "", -1)
 		recordFloat, err := strconv.ParseFloat(record, 64)
 		if err != nil {
 			return fmt.Errorf("invalid record %s, expected integer, record: %s", rowName, record)
