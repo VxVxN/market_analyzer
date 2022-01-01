@@ -48,51 +48,57 @@ func main() {
 			os.Exit(1)
 		}
 		emitter := os.Args[2]
-		parser := myfileparser.Init("data/emitters/" + emitter + consts.CsvFileExtension)
-
-		rawData, err := parser.Parse()
-		if err != nil {
-			log.Fatalf("Failed to parse file: %v", err)
-		}
-
-		preparer := preparerpkg.Init(rawData)
-		rawMarketData, err := preparer.Prepare()
-		if err != nil {
-			log.Fatalf("Failed to prepare data: %v", err)
-		}
-
-		periodMode, err := marketanalyzer.PeriodModeFromString(*periodFlag)
-		if err != nil {
-			log.Fatalf("Failed to parse period mode from string: %v", err)
-		}
-
-		analyzer := marketanalyzer.Init(rawMarketData)
-		analyzer.SetPeriodMode(periodMode)
-		marketData := analyzer.Calculate()
-
-		numberMode, err := hum.NumberModeFromString(*numberFlag)
-		if err != nil {
-			log.Fatalf("Failed to parse number mode from string: %v", err)
-		}
-
-		humanizer := hum.Init(marketData)
-		humanizer.SetPrecision(*precisionFlag)
-		humanizer.SetNumbersMode(numberMode)
-		humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{
-			// marketanalyzer.Sales,
-			// marketanalyzer.Earnings,
-		})
-		data := humanizer.Humanize()
-
-		saver := csvsaver.Init("data/saved_reports/humanize_data.csv", data.Headers, data.Rows)
-		if err = saver.Save(); err != nil {
-			log.Fatalf("Failed to save file: %v", err)
-		}
-
-		printer := p.Init()
-		printer.Print(data)
+		report(emitter, periodFlag, numberFlag, precisionFlag)
 	default:
 		fmt.Println("command doesn't exist")
 		os.Exit(1)
 	}
+}
+
+func report(emitter string, periodFlag *string, numberFlag *string, precisionFlag *int) {
+	parser := myfileparser.Init("data/emitters/" + emitter + consts.CsvFileExtension)
+
+	rawData, err := parser.Parse()
+	if err != nil {
+		log.Fatalf("Failed to parse file: %v", err)
+	}
+
+	preparer := preparerpkg.Init(rawData)
+	rawMarketData, err := preparer.Prepare()
+	if err != nil {
+		log.Fatalf("Failed to prepare data: %v", err)
+	}
+
+	periodMode, err := marketanalyzer.PeriodModeFromString(*periodFlag)
+	if err != nil {
+		log.Fatalf("Failed to parse period mode from string: %v", err)
+	}
+
+	analyzer := marketanalyzer.Init(rawMarketData)
+	analyzer.SetPeriodMode(periodMode)
+	marketData := analyzer.Calculate()
+
+	numberMode, err := hum.NumberModeFromString(*numberFlag)
+	if err != nil {
+		log.Fatalf("Failed to parse number mode from string: %v", err)
+	}
+
+	humanizer := hum.Init(marketData)
+	humanizer.SetPrecision(*precisionFlag)
+	humanizer.SetNumbersMode(numberMode)
+	humanizer.SetFieldsForDisplay(
+		[]marketanalyzer.RowName{
+			// marketanalyzer.Sales,
+			// marketanalyzer.Earnings,
+		},
+	)
+	data := humanizer.Humanize()
+
+	saver := csvsaver.Init("data/saved_reports/humanize_data.csv", data.Headers, data.Rows)
+	if err = saver.Save(); err != nil {
+		log.Fatalf("Failed to save file: %v", err)
+	}
+
+	printer := p.Init()
+	printer.Print(data)
 }

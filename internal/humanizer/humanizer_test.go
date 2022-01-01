@@ -9,7 +9,7 @@ import (
 	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 )
 
-func TestHumanizer_Humanize(t *testing.T) {
+func TestHumanizerHumanize(t *testing.T) {
 	humanizer := Init(&marketanalyzer.MarketData{
 		Quarters: []marketanalyzer.YearQuarter{
 			{
@@ -60,14 +60,14 @@ func TestHumanizer_Humanize(t *testing.T) {
 				big.NewFloat(0.2),
 				big.NewFloat(0.166666667),
 			},
-			marketanalyzer.Debts: {
-				big.NewFloat(3000000000),
-				big.NewFloat(3),
-				big.NewFloat(3.5),
-				big.NewFloat(3.333333333),
-				big.NewFloat(3.25),
-				big.NewFloat(3.2),
-				big.NewFloat(3.166666667),
+			marketanalyzer.MarketCap: {
+				big.NewFloat(0),
+				big.NewFloat(1000000000),
+				big.NewFloat(0),
+				big.NewFloat(0),
+				big.NewFloat(0),
+				big.NewFloat(0),
+				big.NewFloat(0),
 			},
 		},
 		RawData: map[marketanalyzer.RowName][]*big.Int{
@@ -89,10 +89,19 @@ func TestHumanizer_Humanize(t *testing.T) {
 				big.NewInt(6000000000),
 				big.NewInt(7000000000),
 			},
+			marketanalyzer.MarketCap: {
+				big.NewInt(0),
+				big.NewInt(1000000000),
+				big.NewInt(1000000000),
+				big.NewInt(1000000000),
+				big.NewInt(1000000000),
+				big.NewInt(1000000000),
+				big.NewInt(1000000000),
+			},
 		},
 	})
 	humanizer.SetPrecision(1)
-	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{marketanalyzer.Earnings, marketanalyzer.Sales})
+	humanizer.SetFieldsForDisplay([]marketanalyzer.RowName{marketanalyzer.Earnings, marketanalyzer.Sales, marketanalyzer.MarketCap})
 	humanizer.SetNumbersMode(NumbersWithPercentagesMode)
 	data := humanizer.Humanize()
 
@@ -115,6 +124,16 @@ func TestHumanizer_Humanize(t *testing.T) {
 				"2019/3",
 			},
 			expectedRows: [][]string{
+				{
+					"market_cap",
+					"-",
+					"1.000.000.000",
+					"1.000.000.000(+0.0%)",
+					"1.000.000.000(+0.0%)",
+					"1.000.000.000(+0.0%)",
+					"1.000.000.000(+0.0%)",
+					"1.000.000.000(+0.0%)",
+				},
 				{
 					"sales",
 					"1.000.000.000",

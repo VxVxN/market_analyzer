@@ -68,15 +68,22 @@ func (humanizer *Humanizer) Humanize() *ReadyData {
 		row := []string{string(name)}
 		for i, record := range records {
 			switch {
-			case record.Sign() == 0:
-				row = append(row, "-")
 			case record.IsInt() && !isFindNumber:
+				if record.Sign() == 0 {
+					row = append(row, "-")
+					continue
+				}
 				isFindNumber = true
 				str := record.Text('g', 100)
 				str = tools.HumanizeNumber(str)
 				row = append(row, str)
 			default:
 				rawData := humanizer.marketData.RawData[name][i]
+
+				if rawData.Sign() == 0 {
+					row = append(row, "-")
+					continue
+				}
 
 				result := new(big.Float).Mul(record, new(big.Float).SetInt64(100))
 				sign := "+"

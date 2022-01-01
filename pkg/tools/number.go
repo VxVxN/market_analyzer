@@ -8,8 +8,8 @@ func HumanizeNumber(str string) string {
 	for i, s := range str {
 		count++
 		result += string(s)
-		if i == len(str)-1 { // don't set last dot
-			break
+		if i == len(str)-1 || string(str[i+1]) == `-` { // don't set last dot
+			continue
 		}
 		if count == 3 {
 			count = 0
