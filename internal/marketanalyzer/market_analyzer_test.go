@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var marketAnalyzer = Init(&RawMarketData{
@@ -119,7 +120,8 @@ func TestMarketAnalyzerCalculatePeriodMode(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		marketAnalyzer.SetPeriodMode(testCase.periodMode)
-		data := marketAnalyzer.Calculate()
+		data, err := marketAnalyzer.Calculate()
+		require.NoError(t, err)
 
 		for _, quarter := range data.Quarters {
 			var isFind bool
@@ -293,7 +295,8 @@ func TestMarketAnalyzerCalculatePercentageChanges(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		marketAnalyzer.SetPeriodMode(testCase.mode)
-		data := marketAnalyzer.Calculate()
+		data, err := marketAnalyzer.Calculate()
+		require.NoError(t, err)
 
 		for _, quarter := range data.Quarters {
 			var isFind bool

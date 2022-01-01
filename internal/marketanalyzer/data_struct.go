@@ -11,6 +11,7 @@ type MarketData struct {
 	Quarters          []YearQuarter
 	PercentageChanges map[RowName][]*big.Float
 	RawData           map[RowName][]*big.Int
+	Multipliers       map[MultiplierName][]*big.Float
 }
 
 type YearQuarter struct {
@@ -25,4 +26,11 @@ const (
 	Earnings          = "earnings"
 	Debts             = "debts"
 	MarketCap         = "market_cap"
+)
+
+type MultiplierName string
+
+const (
+	PE MultiplierName = "p/e"
+	PS                = "p/s"
 )

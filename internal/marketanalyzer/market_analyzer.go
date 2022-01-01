@@ -1,6 +1,8 @@
 package marketanalyzer
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/VxVxN/market_analyzer/pkg/tools"
@@ -19,17 +21,61 @@ func Init(data *RawMarketData) *MarketAnalyzer {
 	}
 }
 
-func (analyzer *MarketAnalyzer) Calculate() *MarketData {
+func (analyzer *MarketAnalyzer) Calculate() (*MarketData, error) {
 	calculatedData := &MarketData{
 		Quarters: analyzer.data.YearQuarters,
 	}
 
-	changedData := analyzer.changeDataByPeriodMode()
-	calculatedData.Quarters = changedData.YearQuarters
-	calculatedData.RawData = changedData.Data
+	data := analyzer.changeDataByPeriodMode()
+	calculatedData.Quarters = data.YearQuarters
+	calculatedData.RawData = data.Data
+	var err error
+	calculatedData.Multipliers, err = analyzer.calculateMultipliers(data)
+	if err != nil {
+		return nil, fmt.Errorf("error calculate multipliers: %v", err)
+	}
+	analyzer.calculatePercentageChanges(data, calculatedData)
+	return calculatedData, nil
+}
 
-	analyzer.calculatePercentageChanges(changedData, calculatedData)
-	return calculatedData
+func (analyzer *MarketAnalyzer) calculateMultipliers(data *RawMarketData) (map[MultiplierName][]*big.Float, error) {
+	multipliers := make(map[MultiplierName][]*big.Float)
+	marketCaps, ok := data.Data[MarketCap]
+	if !ok {
+		return nil, errors.New("market capacity not found")
+	}
+	sales, ok := data.Data[Sales]
+	if !ok {
+		return nil, errors.New("sales not found")
+	}
+	earnings, ok := data.Data[Earnings]
+	if !ok {
+		return nil, errors.New("earnings not found")
+	}
+	var pe []*big.Float
+	var ps []*big.Float
+
+	for i, marketCap := range marketCaps {
+		marketCapFloat := new(big.Float).SetInt(marketCap)
+		earningsFloat := new(big.Float).SetInt(earnings[i])
+		salesFloat := new(big.Float).SetInt(sales[i])
+
+		if earningsFloat.Sign() == 0 {
+			pe = append(pe, new(big.Float))
+		} else {
+			pe = append(pe, new(big.Float).Quo(marketCapFloat, earningsFloat))
+		}
+
+		if salesFloat.Sign() == 0 {
+			ps = append(ps, new(big.Float))
+		} else {
+			ps = append(ps, new(big.Float).Quo(marketCapFloat, salesFloat))
+		}
+	}
+	multipliers[PE] = pe
+	multipliers[PS] = ps
+
+	return multipliers, nil
 }
 
 func (analyzer *MarketAnalyzer) calculatePercentageChanges(changedData *RawMarketData, calculatedData *MarketData) {

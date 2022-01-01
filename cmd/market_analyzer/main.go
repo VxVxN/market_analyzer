@@ -15,7 +15,6 @@ import (
 	"github.com/VxVxN/market_analyzer/internal/marketanalyzer"
 	"github.com/VxVxN/market_analyzer/internal/parser/myfileparser"
 	preparerpkg "github.com/VxVxN/market_analyzer/internal/preparer"
-	p "github.com/VxVxN/market_analyzer/internal/printer"
 	"github.com/VxVxN/market_analyzer/internal/saver/csvsaver"
 )
 
@@ -76,7 +75,10 @@ func report(emitter string, periodFlag *string, numberFlag *string, precisionFla
 
 	analyzer := marketanalyzer.Init(rawMarketData)
 	analyzer.SetPeriodMode(periodMode)
-	marketData := analyzer.Calculate()
+	marketData, err := analyzer.Calculate()
+	if err != nil {
+		log.Fatalf("Failed to calculate market model: %v", err)
+	}
 
 	numberMode, err := hum.NumberModeFromString(*numberFlag)
 	if err != nil {
@@ -99,6 +101,6 @@ func report(emitter string, periodFlag *string, numberFlag *string, precisionFla
 		log.Fatalf("Failed to save file: %v", err)
 	}
 
-	printer := p.Init()
-	printer.Print(data)
+	// printer := p.Init()
+	// printer.Print(data)
 }

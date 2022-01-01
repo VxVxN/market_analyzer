@@ -109,6 +109,31 @@ func (humanizer *Humanizer) Humanize() *ReadyData {
 		}
 		data.Rows = append(data.Rows, row)
 	}
+
+	orderMultipliers := []marketanalyzer.MultiplierName{
+		marketanalyzer.PE,
+		marketanalyzer.PS,
+	}
+
+	for _, name := range orderMultipliers {
+		if len(humanizer.fieldsForDisplay) != 0 {
+			continue
+		}
+		records, ok := humanizer.marketData.Multipliers[name]
+		if !ok {
+			// TODO add warning
+			continue
+		}
+		row := []string{string(name)}
+		for _, record := range records {
+			str := "-"
+			if record.Sign() != 0 {
+				str = record.Text('f', humanizer.precision)
+			}
+			row = append(row, str)
+		}
+		data.Rows = append(data.Rows, row)
+	}
 	return data
 }
 
