@@ -58,6 +58,15 @@ var marketAnalyzer = Init(&RawMarketData{
 			big.NewInt(6000000000),
 			big.NewInt(7000000000),
 		},
+		MarketCap: {
+			big.NewInt(1000000000),
+			big.NewInt(1000000000),
+			big.NewInt(1000000000),
+			big.NewInt(1000000000),
+			big.NewInt(1000000000),
+			big.NewInt(1000000000),
+			big.NewInt(1000000000),
+		},
 	},
 })
 
