@@ -213,13 +213,17 @@ func (analyzer *MarketAnalyzer) groupByYears(
 		endSegment = startSegment + len(quarters.quarters)
 		for name, records := range analyzer.data.Data {
 			values := records[startSegment:endSegment]
-			sumQuartersValue := new(big.Int)
+			result := new(big.Int)
 
-			for _, value := range values {
-				sumQuartersValue.Add(sumQuartersValue, value)
+			if name == MarketCap {
+				result = values[len(values)-1]
+			} else {
+				for _, value := range values {
+					result.Add(result, value)
+				}
 			}
 
-			data[name] = append(data[name], sumQuartersValue)
+			data[name] = append(data[name], result)
 		}
 		startSegment = endSegment
 
