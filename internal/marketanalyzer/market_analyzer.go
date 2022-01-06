@@ -46,19 +46,25 @@ func (analyzer *MarketAnalyzer) calculateMultipliers(data *RawMarketData) (map[M
 	}
 	sales, ok := data.Data[Sales]
 	if !ok {
-		return nil, errors.New("sales not found")
+		fmt.Println("warn: sales not found")
 	}
 	earnings, ok := data.Data[Earnings]
 	if !ok {
-		return nil, errors.New("earnings not found")
+		fmt.Println("warn: earnings not found")
 	}
 	var pe []*big.Float
 	var ps []*big.Float
 
 	for i, marketCap := range marketCaps {
 		marketCapFloat := new(big.Float).SetInt(marketCap)
-		earningsFloat := new(big.Float).SetInt(earnings[i])
-		salesFloat := new(big.Float).SetInt(sales[i])
+		earningsFloat := new(big.Float)
+		if len(earnings) > i {
+			earningsFloat = earningsFloat.SetInt(earnings[i])
+		}
+		salesFloat := new(big.Float)
+		if len(sales) > i {
+			salesFloat = salesFloat.SetInt(sales[i])
+		}
 
 		if earningsFloat.Sign() == 0 {
 			pe = append(pe, new(big.Float))
@@ -209,19 +215,10 @@ func (analyzer *MarketAnalyzer) groupByYears(
 			values := records[startSegment:endSegment]
 			sumQuartersValue := new(big.Int)
 
-			var numberNoneEmptyVaoue int
 			for _, value := range values {
-				if value.Sign() != 0 {
-					numberNoneEmptyVaoue++
-				}
 				sumQuartersValue.Add(sumQuartersValue, value)
 			}
-			numberValues := int64(numberNoneEmptyVaoue)
-			if numberValues < 1 {
-				numberValues = 1
-			}
 
-			sumQuartersValue.Div(sumQuartersValue, big.NewInt(numberValues))
 			data[name] = append(data[name], sumQuartersValue)
 		}
 		startSegment = endSegment

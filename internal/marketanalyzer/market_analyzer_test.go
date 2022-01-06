@@ -122,8 +122,8 @@ func TestMarketAnalyzerCalculatePeriodMode(t *testing.T) {
 			expectedRawData: []*big.Int{
 				big.NewInt(1000000000),
 				big.NewInt(2000000000),
-				big.NewInt(3500000000),
-				big.NewInt(6000000000),
+				big.NewInt(7000000000),
+				big.NewInt(18000000000),
 			},
 		},
 	}
@@ -252,8 +252,8 @@ func TestMarketAnalyzerCalculatePercentageChanges(t *testing.T) {
 			expectedPercentageData: []*big.Float{
 				big.NewFloat(1000000000),
 				big.NewFloat(1),
-				big.NewFloat(0.75),
-				big.NewFloat(0.7142857143),
+				big.NewFloat(2.5),
+				big.NewFloat(1.571428571),
 			},
 		},
 		// case 4
