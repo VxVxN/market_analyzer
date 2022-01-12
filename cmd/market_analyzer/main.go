@@ -96,7 +96,8 @@ func report(emitter string, periodFlag *string, numberFlag *string, precisionFla
 	)
 	data := humanizer.Humanize()
 
-	saver := csvsaver.Init("data/saved_reports/humanize_data.csv", data.Headers, data.Rows)
+	fileName := fmt.Sprintf("data/saved_reports/%s.csv", emitter)
+	saver := csvsaver.Init(fileName, data.Headers, data.Rows)
 	if err = saver.Save(); err != nil {
 		log.Fatalf("Failed to save file: %v", err)
 	}
