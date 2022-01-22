@@ -2,6 +2,7 @@
 package smartlabparser
 
 import (
+	"bytes"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -16,14 +17,14 @@ import (
 
 type Parser struct {
 	filePath    string
+	fileData    []byte
 	isLTMHeader bool
 	readyData   *humanizer.ReadyData
 }
 
-func Init(filePath string) *Parser {
+func Init() *Parser {
 	return &Parser{
 		readyData: new(humanizer.ReadyData),
-		filePath:  filePath,
 	}
 }
 
@@ -35,16 +36,22 @@ var parsedRows = map[string]marketanalyzer.RowName{
 }
 
 func (parser *Parser) Parse() (*humanizer.ReadyData, error) {
-	file, err := os.Open(parser.filePath)
-	if err != nil {
-		return nil, err
+	var reader io.Reader
+
+	if len(parser.fileData) != 0 {
+		reader = bytes.NewReader(parser.fileData)
+	} else {
+		fileData, err := os.ReadFile(parser.filePath)
+		if err != nil {
+			return nil, err
+		}
+		reader = bytes.NewReader(fileData)
 	}
-	defer file.Close()
 
-	reader := csv.NewReader(file)
-	reader.Comma = ';'
+	csvReader := csv.NewReader(reader)
+	csvReader.Comma = ';'
 
-	headers, err := reader.Read()
+	headers, err := csvReader.Read()
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +61,7 @@ func (parser *Parser) Parse() (*humanizer.ReadyData, error) {
 	}
 
 	for {
-		record, err := reader.Read()
+		record, err := csvReader.Read()
 		if err == io.EOF {
 			break
 		}
@@ -132,4 +139,12 @@ func (parser *Parser) parseRow(records []string) error {
 	parser.readyData.Rows = append(parser.readyData.Rows, readyRecords)
 
 	return nil
+}
+
+func (parser *Parser) SetFilePath(filePath string) {
+	parser.filePath = filePath
+}
+
+func (parser *Parser) SetFileData(fileData []byte) {
+	parser.fileData = fileData
 }

@@ -8,7 +8,8 @@ import (
 )
 
 func TestParserParse(t *testing.T) {
-	parser := Init("fixp_test_data.csv")
+	parser := Init()
+	parser.SetFilePath("fixp_test_data.csv")
 	data, err := parser.Parse()
 	require.NoError(t, err, "failed to parse file")
 

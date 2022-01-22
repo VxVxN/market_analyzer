@@ -12,7 +12,8 @@ func main() {
 	if len(os.Args) != 3 {
 		log.Fatalln("two arguments were expected")
 	}
-	parser := smartlabparser.Init(os.Args[1])
+	parser := smartlabparser.Init()
+	parser.SetFilePath(os.Args[1])
 	data, err := parser.Parse()
 	if err != nil {
 		log.Fatalln(err)
