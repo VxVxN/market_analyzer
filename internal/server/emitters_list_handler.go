@@ -12,6 +12,28 @@ import (
 	e "github.com/VxVxN/market_analyzer/pkg/error"
 )
 
+/**
+ * @api {post} /emitters/list Return list of emitters
+ * @apiName emittersListHandler
+ * @apiGroup emitters
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *		HTTP/1.1 200 OK
+ *		{
+ *			"emitters": [
+ *				"sber",
+ *				"vtbr",
+ *				"yndx"
+ *			]
+ *		}
+ *
+ * @apiErrorExample Error-Response:
+ *		HTTP/1.1 500 Internal Server Error
+ *		{
+ *			"message":"Failed to walk directories"
+ *		}
+ */
+
 func (server *Server) emittersListHandler(c *gin.Context) {
 	var emitters []string
 	err := filepath.WalkDir("data/emitters", func(path string, d fs.DirEntry, err error) error {

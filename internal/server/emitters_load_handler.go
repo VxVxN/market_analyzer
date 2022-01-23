@@ -13,6 +13,22 @@ import (
 	"github.com/VxVxN/market_analyzer/pkg/tools"
 )
 
+/**
+ * @api {post} /emitters/load Uploads emitter data
+ * @apiName emittersLoadHandler
+ * @apiGroup emitters
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *		HTTP/1.1 200 OK
+ *		{}
+ *
+ * @apiErrorExample Error-Response:
+ *		HTTP/1.1 500 Internal Server Error
+ *		{
+ *			"message":"Failed to open file"
+ *		}
+ */
+
 func (server *Server) emittersLoadHandler(c *gin.Context) {
 
 	fileHeader, err := c.FormFile("emitter")
