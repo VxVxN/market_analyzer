@@ -9,7 +9,7 @@ type Server struct {
 	router *gin.Engine
 }
 
-func InitServer() (*Server, error) {
+func Init() (*Server, error) {
 	gin.SetMode(gin.ReleaseMode)
 	server := Server{router: gin.Default()}
 

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	server, err := httpserver.InitServer()
+	server, err := httpserver.Init()
 	if err != nil {
 		slog.Fatalln("Failed to init md server", err)
 	}
