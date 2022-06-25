@@ -18,7 +18,7 @@ import (
 func InitReportCmd() *cobra.Command {
 	var precisionFlag int
 	var periodFlag, numberFlag string
-	var cmdReport = &cobra.Command{
+	var reportCmd = &cobra.Command{
 		Use:   "report [name of emitter]",
 		Short: "Generate report about emitter",
 		Args:  cobra.MinimumNArgs(1),
@@ -26,11 +26,11 @@ func InitReportCmd() *cobra.Command {
 			report(args[0], &periodFlag, &numberFlag, &precisionFlag)
 		},
 	}
-	cmdReport.Flags().IntVarP(&precisionFlag, "precision", "", 2, "Sets the number of digits after the dot for percentages")
-	cmdReport.Flags().StringVarP(&periodFlag, "period", "", marketanalyzer.NormalMode.String(), "Sets the period mode")
-	cmdReport.Flags().StringVarP(&numberFlag, "number", "", hum.NumbersWithPercentagesMode.String(), "Sets the number mode")
+	reportCmd.Flags().IntVarP(&precisionFlag, "precision", "", 2, "Sets the number of digits after the dot for percentages")
+	reportCmd.Flags().StringVarP(&periodFlag, "period", "", marketanalyzer.NormalMode.String(), "Sets the period mode")
+	reportCmd.Flags().StringVarP(&numberFlag, "number", "", hum.NumbersWithPercentagesMode.String(), "Sets the number mode")
 
-	return cmdReport
+	return reportCmd
 }
 
 func report(emitter string, periodFlag *string, numberFlag *string, precisionFlag *int) {
