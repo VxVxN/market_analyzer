@@ -23,14 +23,14 @@ type RowName string
 
 const (
 	Sales     RowName = "sales"
-	Earnings          = "earnings"
-	Debts             = "debts"
-	MarketCap         = "market_cap"
+	Earnings  RowName = "earnings"
+	Debts     RowName = "debts"
+	MarketCap RowName = "market_cap"
 )
 
 type MultiplierName string
 
 const (
 	PE MultiplierName = "p/e"
-	PS                = "p/s"
+	PS MultiplierName = "p/s"
 )

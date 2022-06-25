@@ -14,7 +14,7 @@ import (
 func InitImportCmd() *cobra.Command {
 	var nameFlag string
 
-	importCmd := &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import smart lab file",
 		Args:  cobra.MinimumNArgs(1),
@@ -35,7 +35,7 @@ func InitImportCmd() *cobra.Command {
 		},
 	}
 
-	importCmd.Flags().StringVarP(&nameFlag, "name", "n", "", "Sets name of emitter")
+	cmd.Flags().StringVarP(&nameFlag, "name", "n", "", "Sets name of emitter")
 
-	return importCmd
+	return cmd
 }

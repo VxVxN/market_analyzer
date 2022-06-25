@@ -20,3 +20,12 @@ func ContainNumberInSlice(number int, slice []int) bool {
 	}
 	return false
 }
+
+func ContainStringInSlice(str string, slice []string) bool {
+	for _, elem := range slice {
+		if str == elem {
+			return true
+		}
+	}
+	return false
+}

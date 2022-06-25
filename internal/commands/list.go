@@ -12,7 +12,7 @@ import (
 )
 
 func InitListCmd() *cobra.Command {
-	listCmd := &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Print list of emitters",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -28,5 +28,5 @@ func InitListCmd() *cobra.Command {
 		},
 	}
 
-	return listCmd
+	return cmd
 }

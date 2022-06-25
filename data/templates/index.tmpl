@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Market analyzer</title>
+</head>
+<body>
+    <h1>Market analyzer</h1>
+    {{range $val := .}}
+        <a href="{{.Url}}">{{.Label}}</a>
+        <br>
+    {{end}}
+</body>
+</html>
