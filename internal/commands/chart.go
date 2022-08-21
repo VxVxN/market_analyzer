@@ -42,8 +42,8 @@ func InitChartCmd() *cobra.Command {
 
 			commonDataPage := "Common data"
 			ratioPage := "Ratio data"
-			commonDataUrl := renderChart(commonDataPage, report, ratiosForChart, emitter)
-			ratioUrl := renderChart(ratioPage, report, commonValueForChart, emitter)
+			commonDataUrl := renderChart(commonDataPage, report, ratiosForChart, emitter, false)
+			ratioUrl := renderChart(ratioPage, report, commonValueForChart, emitter, true)
 
 			f, _ := os.Create("data/saved_charts/index.html")
 
@@ -79,7 +79,7 @@ type Link struct {
 	Label string
 }
 
-func renderChart(pageTitle string, report *hum.ReadyData, ratiosForChart []string, emitter string) string {
+func renderChart(pageTitle string, report *hum.ReadyData, ratiosForChart []string, emitter string, isFloat bool) string {
 	chart := charts.NewLine()
 	chart.SetGlobalOptions(
 		charts.WithTitleOpts(
@@ -117,7 +117,7 @@ func renderChart(pageTitle string, report *hum.ReadyData, ratiosForChart []strin
 		if tools.ContainStringInSlice(row[0], ratiosForChart) {
 			continue
 		}
-		chart.AddSeries(row[0], prepareLineItems(row))
+		chart.AddSeries(row[0], prepareLineItems(row, isFloat))
 	}
 
 	chart.SetSeriesOptions(
@@ -140,7 +140,7 @@ func renderChart(pageTitle string, report *hum.ReadyData, ratiosForChart []strin
 	return filename
 }
 
-func prepareLineItems(row []string) []opts.LineData {
+func prepareLineItems(row []string, isFloat bool) []opts.LineData {
 	items := make([]opts.LineData, 0)
 	rowWithoutTitle := row[1:]
 	for _, rawValue := range rowWithoutTitle {
@@ -148,7 +148,11 @@ func prepareLineItems(row []string) []opts.LineData {
 		if rawValue == "-" {
 			value = ""
 		} else {
-			value = strings.Replace(rawValue, ".", "", -1)
+			if isFloat {
+				value = rawValue
+			} else {
+				value = strings.Replace(rawValue, ".", "", -1)
+			}
 		}
 		items = append(items, opts.LineData{Name: row[0], SymbolSize: 5, Value: value})
 	}
