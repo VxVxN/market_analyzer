@@ -16,7 +16,7 @@ import (
 	"github.com/VxVxN/market_analyzer/pkg/tools"
 )
 
-func InitChartCmd() *cobra.Command {
+func InitWebCmd() *cobra.Command {
 	var precisionFlag int
 	var periodFlag string
 
@@ -33,7 +33,7 @@ func InitChartCmd() *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "chart",
+		Use:   "web",
 		Short: "todo",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {

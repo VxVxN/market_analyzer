@@ -16,7 +16,7 @@ func main() {
 	rootCmd.AddCommand(commands.InitListCmd())
 	rootCmd.AddCommand(commands.InitReportCmd())
 	rootCmd.AddCommand(commands.InitImportCmd())
-	rootCmd.AddCommand(commands.InitChartCmd())
+	rootCmd.AddCommand(commands.InitWebCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
