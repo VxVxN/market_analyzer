@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.Name}}</title>
+</head>
+<body>
+    <h1>{{.Name}}</h1>
+    <a href="/">Home</a><br>
+    {{range $val := .Links}}
+        <a href="{{.Url}}">{{.Label}}</a>
+        <br>
+    {{end}}
+</body>
+</html>

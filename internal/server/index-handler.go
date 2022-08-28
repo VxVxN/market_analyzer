@@ -12,29 +12,12 @@ import (
 	e "github.com/VxVxN/market_analyzer/pkg/error"
 )
 
-/**
- * @api {post} /emitters/list Return list of emitters
- * @apiName emittersListHandler
- * @apiGroup emitters
- *
- * @apiSuccessExample {json} Success-Response:
- *		HTTP/1.1 200 OK
- *		{
- *			"emitters": [
- *				"sber",
- *				"vtbr",
- *				"yndx"
- *			]
- *		}
- *
- * @apiErrorExample Error-Response:
- *		HTTP/1.1 500 Internal Server Error
- *		{
- *			"message":"Failed to walk directories"
- *		}
- */
+type Link struct {
+	Url   string
+	Label string
+}
 
-func (server *Server) emittersListHandler(c *gin.Context) {
+func (server *Server) indexHandler(c *gin.Context) {
 	var emitters []string
 	err := filepath.WalkDir("data/emitters", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
@@ -48,7 +31,17 @@ func (server *Server) emittersListHandler(c *gin.Context) {
 		e.NewError("Failed to walk directories", http.StatusInternalServerError, nil).JsonResponse(c)
 		return
 	}
-	c.JSON(200, gin.H{
-		"emitters": emitters,
-	})
+
+	var links []Link
+	for _, name := range emitters {
+		links = append(links, Link{
+			Url:   "/emitter/" + name,
+			Label: name,
+		})
+	}
+
+	if err = server.indexTemplate.Execute(c.Writer, links); err != nil {
+		e.NewError("Failed to execute index template", http.StatusInternalServerError, nil).JsonResponse(c)
+		return
+	}
 }
