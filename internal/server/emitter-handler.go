@@ -27,6 +27,10 @@ func (server *Server) emitterHandler(c *gin.Context) {
 				Url:   "/emitter/" + emitter + "/ratio-data",
 				Label: "Ratio data",
 			},
+			{
+				Url:   "/emitter/" + emitter + "/note",
+				Label: "Note",
+			},
 		},
 	}
 

@@ -13,6 +13,7 @@ type Server struct {
 
 	indexTemplate   *template.Template
 	emitterTemplate *template.Template
+	noteTemplate    *template.Template
 }
 
 func Init() (*Server, error) {
@@ -24,14 +25,21 @@ func Init() (*Server, error) {
 		return nil, fmt.Errorf("cannot init log: %v", err)
 	}
 
-	server.indexTemplate, err = template.ParseFiles("data/templates/index.tmpl")
+	server.router.Static("/static/", "web/")
+
+	server.indexTemplate, err = template.ParseFiles("web/templates/index.tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("cannot init index template: %v", err)
 	}
 
-	server.emitterTemplate, err = template.ParseFiles("data/templates/emitter.tmpl")
+	server.emitterTemplate, err = template.ParseFiles("web/templates/emitter.tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("cannot init emitter template: %v", err)
+	}
+
+	server.noteTemplate, err = template.ParseFiles("web/templates/note.tmpl")
+	if err != nil {
+		return nil, fmt.Errorf("cannot init note template: %v", err)
 	}
 
 	return &server, nil
@@ -50,4 +58,7 @@ func (server *Server) SetRoutes() {
 	server.router.GET("/emitter/:name", server.emitterHandler)
 	server.router.GET("/emitter/:name/common-data", server.commonDataHandler)
 	server.router.GET("/emitter/:name/ratio-data", server.ratioDataHandler)
+
+	server.router.GET("/emitter/:name/note", server.noteHandler)
+	server.router.POST("/emitter/:name/note/save", server.noteSaveHandler)
 }

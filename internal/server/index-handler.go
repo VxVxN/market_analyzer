@@ -24,6 +24,9 @@ func (server *Server) indexHandler(c *gin.Context) {
 			return nil
 		}
 		emitter := strings.Replace(filepath.Base(path), consts.CsvFileExtension, "", 1)
+		if strings.HasSuffix(emitter, ".txt") {
+			return nil
+		}
 		emitters = append(emitters, emitter)
 		return nil
 	})

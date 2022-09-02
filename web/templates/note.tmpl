@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.Name}}</title>
+</head>
+<body>
+    <h1>{{.Name}}</h1>
+    <a href="/emitter/{{.Name}}">Home</a><br>
+    <p><b>Note:</b></p>
+    <p><textarea id="note" rows="10" cols="45" name="text">{{.Text}}</textarea></p>
+    <p><input id="save" type="button" value="Save"></p>
+
+    <script src="/static/js/note.js"></script>
+    <script src="/static/js/utils.js"></script>
+</body>
+</html>
