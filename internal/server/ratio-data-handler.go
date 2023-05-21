@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,13 @@ func (server *Server) ratioDataHandler(c *gin.Context) {
 		string(marketanalyzer.PS),
 	}
 
-	if err = renderChart(c.Writer, "Ratio data", emitter, report, ratiosForChart, true); err != nil {
+	_, err = c.Writer.WriteString(fmt.Sprintf("<p><a href=\"/emitter/%s\">Back</a></p>", emitter))
+	if err != nil {
+		e.NewError("Failed to write string to writer", http.StatusInternalServerError, err).JsonResponse(c)
+		return
+	}
+
+	if err = renderChart(c.Writer, "Ratio data", "Ratio chart", report, ratiosForChart, true); err != nil {
 		e.NewError("Failed to redner chart", http.StatusInternalServerError, nil).JsonResponse(c)
 		return
 	}

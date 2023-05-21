@@ -16,7 +16,7 @@ func main() {
 
 	server.SetRoutes()
 
-	if err = server.ListenAndServe("0.0.0.0:3030"); err != nil {
+	if err = server.ListenAndServe(":80"); err != nil {
 		log.Fatal.Printf("Failed to run router: %v", err)
 	}
 }

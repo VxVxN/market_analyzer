@@ -2,12 +2,10 @@ package server
 
 import (
 	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"net/http"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/go-echarts/go-echarts/v2/charts"
-	"github.com/go-echarts/go-echarts/v2/opts"
 
 	"github.com/VxVxN/market_analyzer/internal/consts"
 	"github.com/VxVxN/market_analyzer/internal/humanizer"
@@ -17,16 +15,13 @@ import (
 	preparerpkg "github.com/VxVxN/market_analyzer/internal/preparer"
 	e "github.com/VxVxN/market_analyzer/pkg/error"
 	"github.com/VxVxN/market_analyzer/pkg/tools"
+	"github.com/gin-gonic/gin"
+	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/v2/opts"
 )
 
 func (server *Server) commonDataHandler(c *gin.Context) {
 	emitter := c.Param("name")
-
-	report, err := prepareReport(emitter, marketanalyzer.NormalMode, hum.NumbersMode, 2)
-	if err != nil {
-		e.NewError("Failed to prepare report", http.StatusInternalServerError, nil).JsonResponse(c)
-		return
-	}
 
 	commonValueForChart := []string{
 		string(marketanalyzer.Sales),
@@ -34,9 +29,36 @@ func (server *Server) commonDataHandler(c *gin.Context) {
 		string(marketanalyzer.Debts),
 		string(marketanalyzer.MarketCap),
 	}
-	if err = renderChart(c.Writer, "Common data", emitter, report, commonValueForChart, false); err != nil {
-		e.NewError("Failed to redner chart", http.StatusInternalServerError, nil).JsonResponse(c)
+
+	reportTypes := []marketanalyzer.PeriodMode{
+		marketanalyzer.NormalMode,
+		marketanalyzer.FirstQuarterMode,
+		marketanalyzer.SecondQuarterMode,
+		marketanalyzer.ThirdQuarterMode,
+		marketanalyzer.FourthQuarterMode,
+	}
+
+	_, err := c.Writer.WriteString(fmt.Sprintf("<p><a href=\"/emitter/%s\">Back</a></p>", emitter))
+	if err != nil {
+		e.NewError("Failed to write string to writer", http.StatusInternalServerError, err).JsonResponse(c)
 		return
+	}
+
+	for _, reportType := range reportTypes {
+		commonReport, err := prepareReport(emitter, reportType, hum.NumbersMode, 2)
+		if err != nil {
+			e.NewError("Failed to prepare report", http.StatusInternalServerError, err).JsonResponse(c)
+			return
+		}
+		chartTittle := cases.Title(language.English).String(reportType.String()) + " quarter"
+		if reportType == marketanalyzer.NormalMode {
+			chartTittle = "Common chart"
+		}
+
+		if err = renderChart(c.Writer, "Common data", chartTittle, commonReport, commonValueForChart, false); err != nil {
+			e.NewError("Failed to render chart", http.StatusInternalServerError, err).JsonResponse(c)
+			return
+		}
 	}
 }
 
@@ -73,14 +95,12 @@ func prepareReport(emitter string, periodMode marketanalyzer.PeriodMode, numberM
 	return humanizer.Humanize(), nil
 }
 
-func renderChart(writer gin.ResponseWriter, pageTitle, emitter string, report *hum.ReadyData, ratiosForChart []string, isFloat bool) error {
+func renderChart(writer gin.ResponseWriter, pageTitle, chartTittle string, report *hum.ReadyData, ratiosForChart []string, isFloat bool) error {
 	chart := charts.NewLine()
 	chart.SetGlobalOptions(
 		charts.WithTitleOpts(
 			opts.Title{
-				Title:  emitter,
-				Link:   "/emitter/" + emitter,
-				Target: "self",
+				Title: chartTittle,
 			},
 		),
 		charts.WithLegendOpts(
