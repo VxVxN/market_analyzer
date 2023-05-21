@@ -1,7 +1,10 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
+	"path"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,21 +17,24 @@ type EmitterData struct {
 }
 
 func (server *Server) emitterHandler(c *gin.Context) {
+	group := c.Param("group")
 	emitter := c.Param("name")
+
+	templatePath := path.Join("/emitter", strings.ToLower(group), emitter, "%s")
 
 	data := EmitterData{
 		Name: emitter,
 		Links: []Link{
 			{
-				Url:   "/emitter/" + emitter + "/common-data",
+				Url:   fmt.Sprintf(templatePath, "common-data"),
 				Label: "Common data",
 			},
 			{
-				Url:   "/emitter/" + emitter + "/ratio-data",
+				Url:   fmt.Sprintf(templatePath, "ratio-data"),
 				Label: "Ratio data",
 			},
 			{
-				Url:   "/emitter/" + emitter + "/note",
+				Url:   fmt.Sprintf(templatePath, "note"),
 				Label: "Note",
 			},
 		},

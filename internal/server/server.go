@@ -55,10 +55,10 @@ func (server *Server) ListenAndServe(listen string) error {
 
 func (server *Server) SetRoutes() {
 	server.router.GET("/", server.indexHandler)
-	server.router.GET("/emitter/:name", server.emitterHandler)
-	server.router.GET("/emitter/:name/common-data", server.commonDataHandler)
-	server.router.GET("/emitter/:name/ratio-data", server.ratioDataHandler)
+	server.router.GET("/emitter/:group/:name", server.emitterHandler)
+	server.router.GET("/emitter/:group/:name/common-data", server.commonDataHandler)
+	server.router.GET("/emitter/:group/:name/ratio-data", server.ratioDataHandler)
 
-	server.router.GET("/emitter/:name/note", server.noteHandler)
-	server.router.POST("/emitter/:name/note/save", server.noteSaveHandler)
+	server.router.GET("/emitter/:group/:name/note", server.noteHandler)
+	server.router.POST("/emitter/:group/:name/note/save", server.noteSaveHandler)
 }

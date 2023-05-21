@@ -1,8 +1,10 @@
 package server
 
 import (
+	"github.com/VxVxN/market_analyzer/internal/consts"
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/gin-gonic/gin"
 
@@ -10,18 +12,21 @@ import (
 )
 
 type NoteData struct {
-	Name string
-	Text string
+	Group string
+	Name  string
+	Text  string
 }
 
 func (server *Server) noteHandler(c *gin.Context) {
+	group := c.Param("group")
 	emitter := c.Param("name")
 
-	noteText, _ := os.ReadFile("data/emitters/" + emitter + ".txt")
+	noteText, _ := os.ReadFile(path.Join("data", "emitters", group, emitter+consts.TxtFileExtension))
 
 	data := NoteData{
-		Name: emitter,
-		Text: string(noteText),
+		Group: group,
+		Name:  emitter,
+		Text:  string(noteText),
 	}
 
 	if err := server.noteTemplate.Execute(c.Writer, data); err != nil {

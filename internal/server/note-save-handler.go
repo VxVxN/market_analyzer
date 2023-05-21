@@ -1,8 +1,10 @@
 package server
 
 import (
+	"github.com/VxVxN/market_analyzer/internal/consts"
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/VxVxN/log"
 	"github.com/gin-gonic/gin"
@@ -16,6 +18,7 @@ type RequestNoteSave struct {
 }
 
 func (server *Server) noteSaveHandler(c *gin.Context) {
+	group := c.Param("group")
 	emitter := c.Param("name")
 
 	var req RequestNoteSave
@@ -27,7 +30,7 @@ func (server *Server) noteSaveHandler(c *gin.Context) {
 
 	flags := os.O_TRUNC | os.O_WRONLY | os.O_CREATE
 
-	file, err := os.OpenFile("data/emitters/"+emitter+".txt", flags, 0644)
+	file, err := os.OpenFile(path.Join("data", "emitters", group, emitter+consts.TxtFileExtension), flags, 0644)
 	if err != nil {
 		e.NewError("Failed to create note file", http.StatusInternalServerError, nil).JsonResponse(c)
 		return

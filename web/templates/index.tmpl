@@ -6,9 +6,12 @@
 </head>
 <body>
     <h1>Market analyzer</h1>
-    {{range $val := .}}
-        <a href="{{.Url}}">{{.Label}}</a>
-        <br>
+    {{range $Group := .}}
+        <h3>{{.Name}}</h3>
+        {{range $Link := .Links}}
+            <a href="{{.Url}}">{{.Label}}</a>
+            <br>
+        {{end}}
     {{end}}
 </body>
 </html>

@@ -12,9 +12,10 @@ import (
 )
 
 func (server *Server) ratioDataHandler(c *gin.Context) {
+	group := c.Param("group")
 	emitter := c.Param("name")
 
-	report, err := prepareReport(emitter, marketanalyzer.NormalMode, hum.NumbersMode, 2)
+	report, err := prepareReport(group, emitter, marketanalyzer.NormalMode, hum.NumbersMode, 2)
 	if err != nil {
 		e.NewError("Failed to prepare report", http.StatusInternalServerError, nil).JsonResponse(c)
 		return
@@ -25,7 +26,7 @@ func (server *Server) ratioDataHandler(c *gin.Context) {
 		string(marketanalyzer.PS),
 	}
 
-	_, err = c.Writer.WriteString(fmt.Sprintf("<p><a href=\"/emitter/%s\">Back</a></p>", emitter))
+	_, err = c.Writer.WriteString(fmt.Sprintf("<p><a href=\"/emitter/%s/%s\">Back</a></p>", group, emitter))
 	if err != nil {
 		e.NewError("Failed to write string to writer", http.StatusInternalServerError, err).JsonResponse(c)
 		return

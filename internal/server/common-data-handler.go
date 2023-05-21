@@ -5,6 +5,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/VxVxN/market_analyzer/internal/consts"
@@ -21,6 +22,7 @@ import (
 )
 
 func (server *Server) commonDataHandler(c *gin.Context) {
+	group := c.Param("group")
 	emitter := c.Param("name")
 
 	commonValueForChart := []string{
@@ -38,19 +40,20 @@ func (server *Server) commonDataHandler(c *gin.Context) {
 		marketanalyzer.FourthQuarterMode,
 	}
 
-	_, err := c.Writer.WriteString(fmt.Sprintf("<p><a href=\"/emitter/%s\">Back</a></p>", emitter))
+	_, err := c.Writer.WriteString(fmt.Sprintf("<p><a href=\"/emitter/%s/%s\">Back</a></p>", group, emitter))
 	if err != nil {
 		e.NewError("Failed to write string to writer", http.StatusInternalServerError, err).JsonResponse(c)
 		return
 	}
 
+	englishTitle := cases.Title(language.English)
 	for _, reportType := range reportTypes {
-		commonReport, err := prepareReport(emitter, reportType, hum.NumbersMode, 2)
+		commonReport, err := prepareReport(group, emitter, reportType, hum.NumbersMode, 2)
 		if err != nil {
 			e.NewError("Failed to prepare report", http.StatusInternalServerError, err).JsonResponse(c)
 			return
 		}
-		chartTittle := cases.Title(language.English).String(reportType.String()) + " quarter"
+		chartTittle := englishTitle.String(reportType.String()) + " quarter"
 		if reportType == marketanalyzer.NormalMode {
 			chartTittle = "Common chart"
 		}
@@ -62,8 +65,8 @@ func (server *Server) commonDataHandler(c *gin.Context) {
 	}
 }
 
-func prepareReport(emitter string, periodMode marketanalyzer.PeriodMode, numberMode hum.NumberMode, precisionFlag int) (*humanizer.ReadyData, error) {
-	parser := myfileparser.Init("data/emitters/" + emitter + consts.CsvFileExtension)
+func prepareReport(group, emitter string, periodMode marketanalyzer.PeriodMode, numberMode hum.NumberMode, precisionFlag int) (*humanizer.ReadyData, error) {
+	parser := myfileparser.Init(path.Join("data", "emitters", group, emitter+consts.CsvFileExtension))
 
 	rawData, err := parser.Parse()
 	if err != nil {

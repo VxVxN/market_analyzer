@@ -1,8 +1,11 @@
 package server
 
 import (
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"io/fs"
 	"net/http"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -12,39 +15,58 @@ import (
 	e "github.com/VxVxN/market_analyzer/pkg/error"
 )
 
+type Group struct {
+	Name  string
+	Links []Link
+}
+
 type Link struct {
 	Url   string
 	Label string
 }
 
 func (server *Server) indexHandler(c *gin.Context) {
-	var emitters []string
+	emittersByGroup := make(map[string][]string)
+	englishTitle := cases.Title(language.English)
 	err := filepath.WalkDir("data/emitters", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
 			return nil
 		}
+		group := englishTitle.String(filepath.Base(filepath.Dir(path)))
 		emitter := strings.Replace(filepath.Base(path), consts.CsvFileExtension, "", 1)
 		if strings.HasSuffix(emitter, ".txt") {
 			return nil
 		}
-		emitters = append(emitters, emitter)
+		emittersByGroup[group] = append(emittersByGroup[group], emitter)
 		return nil
 	})
 	if err != nil {
-		e.NewError("Failed to walk directories", http.StatusInternalServerError, nil).JsonResponse(c)
+		e.NewError("Failed to walk directories", http.StatusInternalServerError, err).JsonResponse(c)
 		return
 	}
 
-	var links []Link
-	for _, name := range emitters {
-		links = append(links, Link{
-			Url:   "/emitter/" + name,
-			Label: name,
+	groups := prepareGroups(emittersByGroup)
+
+	if err = server.indexTemplate.Execute(c.Writer, groups); err != nil {
+		e.NewError("Failed to execute index template", http.StatusInternalServerError, err).JsonResponse(c)
+		return
+	}
+}
+
+func prepareGroups(emittersByGroup map[string][]string) []Group {
+	var groups []Group
+	for group, links := range emittersByGroup {
+		var resultLinks []Link
+		for _, name := range links {
+			resultLinks = append(resultLinks, Link{
+				Url:   path.Join("emitter", strings.ToLower(group), strings.ToLower(name)),
+				Label: name,
+			})
+		}
+		groups = append(groups, Group{
+			Name:  group,
+			Links: resultLinks,
 		})
 	}
-
-	if err = server.indexTemplate.Execute(c.Writer, links); err != nil {
-		e.NewError("Failed to execute index template", http.StatusInternalServerError, nil).JsonResponse(c)
-		return
-	}
+	return groups
 }
